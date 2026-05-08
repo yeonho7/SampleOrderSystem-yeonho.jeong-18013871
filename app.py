@@ -27,7 +27,7 @@ class App:
         self._sample_ctrl = SampleController(sample_repo, order_repo)
         self._order_ctrl = OrderController(sample_repo, order_repo, job_repo)
         self._production_ctrl = ProductionController(sample_repo, order_repo, job_repo)
-        self._monitor_ctrl = MonitorController(sample_repo, order_repo)
+        self._monitor_ctrl = MonitorController(sample_repo, order_repo, job_repo)
 
         self._main_view = MainView()
         self._sample_view = SampleView()

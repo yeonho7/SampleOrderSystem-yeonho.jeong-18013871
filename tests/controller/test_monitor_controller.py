@@ -2,14 +2,14 @@ import pytest
 from model.sample import Sample
 from model.order import OrderStatus
 from controller.monitor_controller import MonitorController
-from tests.helpers import make_sample, make_order
+from tests.helpers import make_sample, make_order, make_job
 
 
 class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_excludes_rejected_orders(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.RESERVED)
         make_order(order_repo, "ORD-20260508-0002", status=OrderStatus.REJECTED)
 
@@ -19,7 +19,7 @@ class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_counts_reserved_correctly(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.RESERVED)
         make_order(order_repo, "ORD-20260508-0002", status=OrderStatus.RESERVED)
 
@@ -29,7 +29,7 @@ class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_counts_producing_correctly(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.PRODUCING)
 
         result = ctrl.get_order_stats()
@@ -38,7 +38,7 @@ class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_counts_confirmed_correctly(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.CONFIRMED)
         make_order(order_repo, "ORD-20260508-0002", status=OrderStatus.CONFIRMED)
 
@@ -48,7 +48,7 @@ class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_counts_release_correctly(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.RELEASE)
 
         result = ctrl.get_order_stats()
@@ -57,7 +57,7 @@ class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_returns_zero_for_empty_statuses(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
 
         result = ctrl.get_order_stats()
 
@@ -68,7 +68,7 @@ class TestMonitorControllerOrderStats:
 
     def test_get_order_stats_includes_all_four_non_rejected_statuses(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
 
         result = ctrl.get_order_stats()
 
@@ -85,7 +85,7 @@ class TestMonitorControllerStockStatus:
 
     def test_get_stock_status_all_returns_entry_for_each_sample(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", "웨이퍼 A", stock=5)
         make_sample(sample_repo, "S-002", "웨이퍼 B", stock=3)
 
@@ -95,7 +95,7 @@ class TestMonitorControllerStockStatus:
 
     def test_get_stock_status_all_returns_고갈_when_stock_zero(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", stock=0)
 
         result = ctrl.get_stock_status_all()
@@ -107,7 +107,7 @@ class TestMonitorControllerStockStatus:
         self, repos
     ):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", stock=3)
         make_order(order_repo, "ORD-20260508-0001", quantity=5, status=OrderStatus.RESERVED)
 
@@ -118,7 +118,7 @@ class TestMonitorControllerStockStatus:
 
     def test_get_stock_status_all_returns_여유_when_stock_sufficient(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", stock=10)
         make_order(order_repo, "ORD-20260508-0001", quantity=5, status=OrderStatus.RESERVED)
 
@@ -131,7 +131,7 @@ class TestMonitorControllerStockStatus:
         self, repos
     ):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         # stock=2, PRODUCING 주문 5 → 2 < 5 → 부족
         make_sample(sample_repo, "S-001", stock=2)
         make_order(order_repo, "ORD-20260508-0001", quantity=5, status=OrderStatus.PRODUCING)
@@ -145,7 +145,7 @@ class TestMonitorControllerStockStatus:
         self, repos
     ):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         # stock=1, REJECTED 주문 10 → REJECTED 제외하면 미처리=0 → 여유
         make_sample(sample_repo, "S-001", stock=1)
         make_order(order_repo, "ORD-20260508-0001", quantity=10, status=OrderStatus.REJECTED)
@@ -157,7 +157,7 @@ class TestMonitorControllerStockStatus:
 
     def test_get_stock_status_all_entry_contains_sample_object(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", stock=5)
 
         result = ctrl.get_stock_status_all()
@@ -169,7 +169,7 @@ class TestMonitorControllerSummary:
 
     def test_get_summary_returns_correct_sample_count(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", "웨이퍼 A")
         make_sample(sample_repo, "S-002", "웨이퍼 B")
 
@@ -179,7 +179,7 @@ class TestMonitorControllerSummary:
 
     def test_get_summary_returns_correct_total_stock(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001", stock=7)
         make_sample(sample_repo, "S-002", stock=3)
 
@@ -189,7 +189,7 @@ class TestMonitorControllerSummary:
 
     def test_get_summary_excludes_rejected_from_order_count(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001")
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.RESERVED)
         make_order(order_repo, "ORD-20260508-0002", status=OrderStatus.REJECTED)
@@ -201,11 +201,13 @@ class TestMonitorControllerSummary:
 
     def test_get_summary_queue_size_counts_producing_orders(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
         make_sample(sample_repo, "S-001")
         make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.PRODUCING)
         make_order(order_repo, "ORD-20260508-0002", status=OrderStatus.PRODUCING)
         make_order(order_repo, "ORD-20260508-0003", status=OrderStatus.CONFIRMED)
+        make_job(job_repo, "ORD-20260508-0001")
+        make_job(job_repo, "ORD-20260508-0002")
 
         result = ctrl.get_summary()
 
@@ -213,7 +215,7 @@ class TestMonitorControllerSummary:
 
     def test_get_summary_returns_zero_when_no_data(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
 
         result = ctrl.get_summary()
 
@@ -224,7 +226,7 @@ class TestMonitorControllerSummary:
 
     def test_get_summary_contains_all_required_keys(self, repos):
         sample_repo, order_repo, job_repo = repos
-        ctrl = MonitorController(sample_repo, order_repo)
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
 
         result = ctrl.get_summary()
 
@@ -232,3 +234,13 @@ class TestMonitorControllerSummary:
         assert "total_stock" in result
         assert "order_count" in result
         assert "queue_size" in result
+
+    def test_get_summary_queue_size_uses_job_repo_count(self, repos):
+        # PRODUCING 주문은 있지만 job이 없으면 queue_size = 0 이어야 함
+        sample_repo, order_repo, job_repo = repos
+        ctrl = MonitorController(sample_repo, order_repo, job_repo)
+        make_order(order_repo, "ORD-20260508-0001", status=OrderStatus.PRODUCING)
+
+        result = ctrl.get_summary()
+
+        assert result["queue_size"] == 0
