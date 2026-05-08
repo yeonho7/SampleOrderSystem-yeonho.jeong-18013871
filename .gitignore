@@ -1,0 +1,6 @@
+.idea/
+.mcp.json
+.venv/
+__pycache__/
+*.pyc
+data/
