@@ -5,6 +5,14 @@
 가상의 반도체 회사 S-Semi를 위한 **콘솔 기반 CLI 애플리케이션**.
 시료 등록, 주문 접수·승인·거절, 생산라인 관리, 출고 처리를 통합한다.
 요구사항 전체는 `docs/PRD.md`를 참고한다.
+구현 참고용 POC 코드는 `POC/` 디렉토리에 있다 (git 추적 제외). 필요 시 참조한다.
+
+| POC 폴더 | 내용 |
+|----------|------|
+| `ConsoleMVC-yeonho-jeong-18013871` | MVC 패턴 콘솔 앱 구조 |
+| `DataMonitor-yeonho.jeong-18013871` | 재고 모니터링 로직 |
+| `DataPersistence-yeonho-jeong-18013871` | JSON 기반 데이터 영속성 |
+| `DummyDataGenerator-yeonho-jeong-18013871` | 테스트용 더미 데이터 생성 |
 
 - **언어**: Python 3
 - **실행**: `python main.py`
