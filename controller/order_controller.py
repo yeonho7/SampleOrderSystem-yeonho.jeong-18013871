@@ -34,6 +34,8 @@ class OrderController:
 
     def approve(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
+        if order is None:
+            raise ValueError("존재하지 않는 주문번호입니다")
         if not order.is_reserved():
             raise ValueError("RESERVED 상태의 주문만 승인할 수 있습니다")
         sample = self._sample_repo.find_by_id(order.sample_id)
@@ -57,6 +59,8 @@ class OrderController:
 
     def reject(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
+        if order is None:
+            raise ValueError("존재하지 않는 주문번호입니다")
         if not order.is_reserved():
             raise ValueError("RESERVED 상태의 주문만 거절할 수 있습니다")
         order.status = OrderStatus.REJECTED
@@ -65,6 +69,8 @@ class OrderController:
 
     def release(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
+        if order is None:
+            raise ValueError("존재하지 않는 주문번호입니다")
         if not order.is_confirmed():
             raise ValueError("CONFIRMED 상태의 주문만 출고할 수 있습니다")
         sample = self._sample_repo.find_by_id(order.sample_id)
