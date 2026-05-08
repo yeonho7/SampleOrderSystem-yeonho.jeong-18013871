@@ -22,7 +22,7 @@ def system(tmp_data_dir):
         "sample": SampleController(sample_repo, order_repo),
         "order": OrderController(sample_repo, order_repo, job_repo),
         "prod": ProductionController(sample_repo, order_repo, job_repo),
-        "mon": MonitorController(sample_repo, order_repo),
+        "mon": MonitorController(sample_repo, order_repo, job_repo),
         # repo 직접 접근이 필요한 검증용
         "sample_repo": sample_repo,
         "order_repo": order_repo,

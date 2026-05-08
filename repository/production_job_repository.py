@@ -1,5 +1,4 @@
 from datetime import datetime
-from pathlib import Path
 
 from model.production_job import ProductionJob
 from repository.base_repository import BaseRepository

@@ -1,5 +1,4 @@
 from datetime import datetime
-from pathlib import Path
 
 from model.order import Order, OrderStatus
 from repository.base_repository import BaseRepository
