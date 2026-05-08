@@ -22,6 +22,8 @@ class OrderController:
     def reserve(self, sample_id, customer_name, quantity) -> Order:
         if self._sample_repo.find_by_id(sample_id) is None:
             raise ValueError("등록되지 않은 시료 ID입니다")
+        if quantity <= 0:
+            raise ValueError("주문 수량은 1 이상이어야 합니다")
         order = Order(
             order_id=self._generate_order_id(),
             sample_id=sample_id,

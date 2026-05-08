@@ -32,6 +32,26 @@ class TestSampleControllerRegister:
         with pytest.raises(ValueError, match="이미 등록된 시료 ID입니다"):
             ctrl.register("S-001", "다른 이름", 3.0, 0.8)
 
+    @pytest.mark.parametrize("yield_rate", [0.0, -0.1, 1.1])
+    def test_register_raises_when_yield_rate_out_of_range(self, repos, yield_rate):
+        sample_repo, order_repo, _ = repos
+        ctrl = SampleController(sample_repo, order_repo)
+        with pytest.raises(ValueError):
+            ctrl.register("S-001", "웨이퍼", 5.0, yield_rate)
+
+    @pytest.mark.parametrize("avg_time", [0.0, -1.0])
+    def test_register_raises_when_avg_production_time_not_positive(self, repos, avg_time):
+        sample_repo, order_repo, _ = repos
+        ctrl = SampleController(sample_repo, order_repo)
+        with pytest.raises(ValueError):
+            ctrl.register("S-001", "웨이퍼", avg_time, 0.9)
+
+    def test_register_raises_when_stock_is_negative(self, repos):
+        sample_repo, order_repo, _ = repos
+        ctrl = SampleController(sample_repo, order_repo)
+        with pytest.raises(ValueError):
+            ctrl.register("S-001", "웨이퍼", 5.0, 0.9, stock=-1)
+
 
 class TestSampleControllerFind:
 

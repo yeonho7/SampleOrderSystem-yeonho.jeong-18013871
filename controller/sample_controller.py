@@ -11,6 +11,12 @@ class SampleController:
     def register(self, sample_id, name, avg_production_time, yield_rate, stock=0) -> Sample:
         if self._sample_repo.find_by_id(sample_id) is not None:
             raise ValueError("이미 등록된 시료 ID입니다")
+        if not (0 < yield_rate <= 1.0):
+            raise ValueError("수율은 0 초과 1.0 이하여야 합니다")
+        if avg_production_time <= 0:
+            raise ValueError("평균 생산시간은 0 초과여야 합니다")
+        if stock < 0:
+            raise ValueError("초기 재고는 0 이상이어야 합니다")
         sample = Sample(
             sample_id=sample_id,
             name=name,

@@ -71,6 +71,14 @@ class TestOrderControllerReserve:
 
         assert order_repo.find_by_id(result.order_id) is not None
 
+    @pytest.mark.parametrize("quantity", [0, -1])
+    def test_reserve_raises_when_quantity_not_positive(self, repos, quantity):
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        with pytest.raises(ValueError):
+            ctrl.reserve("S-001", "고객A", quantity)
+
 
 class TestOrderControllerApprove:
 
