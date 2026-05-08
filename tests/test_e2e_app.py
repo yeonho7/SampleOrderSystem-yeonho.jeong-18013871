@@ -1,10 +1,3 @@
-"""
-E2E 앱 레벨 테스트 — App 클래스를 통해 View 레이어까지 전체 관통.
-builtins.input 패치로 사용자 입력을 시뮬레이션하고, capsys로 출력을 캡처한다.
-
-주문번호 등 동적 값은 pre_* 픽스처에서 컨트롤러로 미리 데이터를 생성한 뒤
-App이 같은 tmp_path를 공유해 읽어오는 방식으로 테스트한다.
-"""
 import pytest
 
 from app import App
@@ -16,9 +9,6 @@ from repository.production_job_repository import ProductionJobRepository
 from repository.sample_repository import SampleRepository
 
 
-# ---------------------------------------------------------------------------
-# 헬퍼 / 픽스처
-# ---------------------------------------------------------------------------
 
 def _run(app_obj, monkeypatch, inputs):
     it = iter(inputs)
@@ -71,9 +61,6 @@ def pre_confirmed(tmp_path):
     return tmp_path, order.order_id
 
 
-# ---------------------------------------------------------------------------
-# 메인 메뉴 (main_view.py)
-# ---------------------------------------------------------------------------
 
 class TestMainView:
 
@@ -95,9 +82,6 @@ class TestMainView:
         assert "올바른 메뉴 번호를 입력하세요" in capsys.readouterr().out
 
 
-# ---------------------------------------------------------------------------
-# 시료 관리 (sample_view.py)
-# ---------------------------------------------------------------------------
 
 class TestSampleView:
 
@@ -162,9 +146,6 @@ class TestSampleView:
         assert "올바른 번호를 입력하세요" in capsys.readouterr().out
 
 
-# ---------------------------------------------------------------------------
-# 주문 접수 (order_view.py — reserve)
-# ---------------------------------------------------------------------------
 
 class TestOrderViewReserve:
 
@@ -185,9 +166,6 @@ class TestOrderViewReserve:
         assert "오류" in capsys.readouterr().out
 
 
-# ---------------------------------------------------------------------------
-# 주문 승인/거절 (order_view.py — approve / reject)
-# ---------------------------------------------------------------------------
 
 class TestOrderViewApproveReject:
 
@@ -244,9 +222,6 @@ class TestOrderViewApproveReject:
         assert "올바른 번호를 입력하세요" in capsys.readouterr().out
 
 
-# ---------------------------------------------------------------------------
-# 모니터링 (monitor_view.py)
-# ---------------------------------------------------------------------------
 
 class TestMonitorView:
 
@@ -277,9 +252,6 @@ class TestMonitorView:
         assert "올바른 번호를 입력하세요" in capsys.readouterr().out
 
 
-# ---------------------------------------------------------------------------
-# 생산라인 (production_view.py)
-# ---------------------------------------------------------------------------
 
 class TestProductionView:
 
@@ -333,9 +305,6 @@ class TestProductionView:
         assert "웨이퍼" in out  # 큐 테이블에 시료명 표시
 
 
-# ---------------------------------------------------------------------------
-# 출고 처리 (order_view.py — release)
-# ---------------------------------------------------------------------------
 
 class TestOrderViewRelease:
 

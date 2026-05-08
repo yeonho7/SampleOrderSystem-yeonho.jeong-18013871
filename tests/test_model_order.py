@@ -1,11 +1,3 @@
-"""
-TDD Red 단계 — model 계층 단위 테스트.
-
-model/sample.py, model/order.py, model/production_job.py 가 아직 존재하지 않으므로
-이 파일을 실행하면 ImportError 가 발생하며 전체 테스트가 FAIL 상태여야 한다.
-구현 후 모든 테스트가 GREEN 으로 전환되는 것이 목표다.
-"""
-
 import pytest
 from datetime import datetime
 
@@ -13,13 +5,7 @@ from model.sample import Sample
 from model.order import Order, OrderStatus
 from model.production_job import ProductionJob
 
-
-# ---------------------------------------------------------------------------
-# Sample 모델
-# ---------------------------------------------------------------------------
-
 class TestSampleFields:
-    """Sample 데이터클래스의 필드 저장 및 반환을 검증한다."""
 
     def test_sample_stores_sample_id(self):
         sample = Sample(
@@ -72,39 +58,24 @@ class TestSampleFields:
         assert sample.stock == 0
 
 
-# ---------------------------------------------------------------------------
-# OrderStatus Enum
-# ---------------------------------------------------------------------------
-
 class TestOrderStatusEnum:
-    """OrderStatus Enum 이 5가지 상태를 모두 갖는지 검증한다."""
 
-    def test_order_status_has_reserved(self):
-        assert OrderStatus.RESERVED.value == "RESERVED"
-
-    def test_order_status_has_rejected(self):
-        assert OrderStatus.REJECTED.value == "REJECTED"
-
-    def test_order_status_has_producing(self):
-        assert OrderStatus.PRODUCING.value == "PRODUCING"
-
-    def test_order_status_has_confirmed(self):
-        assert OrderStatus.CONFIRMED.value == "CONFIRMED"
-
-    def test_order_status_has_release(self):
-        assert OrderStatus.RELEASE.value == "RELEASE"
+    @pytest.mark.parametrize("status, expected", [
+        (OrderStatus.RESERVED,  "RESERVED"),
+        (OrderStatus.REJECTED,  "REJECTED"),
+        (OrderStatus.PRODUCING, "PRODUCING"),
+        (OrderStatus.CONFIRMED, "CONFIRMED"),
+        (OrderStatus.RELEASE,   "RELEASE"),
+    ])
+    def test_order_status_values(self, status, expected):
+        assert status.value == expected
 
     def test_order_status_count_is_five(self):
-        """정확히 5가지 상태만 존재해야 한다."""
         assert len(OrderStatus) == 5
 
 
-# ---------------------------------------------------------------------------
-# Order 모델
-# ---------------------------------------------------------------------------
 
 class TestOrderFields:
-    """Order 데이터클래스의 필드 저장 및 기본값을 검증한다."""
 
     def _make_order(self, **overrides):
         defaults = dict(
@@ -158,12 +129,8 @@ class TestOrderFields:
         assert len(parts[2]) == 4   # NNNN
 
 
-# ---------------------------------------------------------------------------
-# ProductionJob 모델
-# ---------------------------------------------------------------------------
 
 class TestProductionJobFields:
-    """ProductionJob 데이터클래스의 필드 저장을 검증한다."""
 
     def _make_job(self, **overrides):
         defaults = dict(
@@ -216,9 +183,6 @@ class TestProductionJobFields:
         assert job.actual_production == 10
 
 
-# ---------------------------------------------------------------------------
-# OrderStatus helper methods
-# ---------------------------------------------------------------------------
 
 class TestOrderStatusHelpers:
     def test_is_pending_returns_true_for_reserved(self):
@@ -246,9 +210,6 @@ class TestOrderStatusHelpers:
         assert OrderStatus.CONFIRMED.is_rejected() is False
 
 
-# ---------------------------------------------------------------------------
-# Order helper methods
-# ---------------------------------------------------------------------------
 
 class TestOrderHelpers:
     def _make_order(self, **overrides):
@@ -278,9 +239,6 @@ class TestOrderHelpers:
         assert order.is_confirmed() is False
 
 
-# ---------------------------------------------------------------------------
-# __repr__
-# ---------------------------------------------------------------------------
 
 class TestModelRepr:
     def test_sample_repr_contains_sample_id(self):

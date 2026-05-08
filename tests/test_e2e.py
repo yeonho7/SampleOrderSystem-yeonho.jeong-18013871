@@ -1,8 +1,3 @@
-"""
-E2E 테스트 — Model + Repository + Controller 전 레이어 관통 시나리오.
-View 레이어는 제외하고 Controller를 직접 호출한다.
-실제 임시 JSON 파일을 사용하며 Mock을 사용하지 않는다.
-"""
 import pytest
 from math import ceil
 
@@ -35,9 +30,6 @@ def system(tmp_data_dir):
     }
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 1: 재고 충분 — 전체 출고 플로우
-# ---------------------------------------------------------------------------
 
 def test_scenario_1_full_release_flow_when_stock_sufficient(system):
     sc = system["sample"]
@@ -76,9 +68,6 @@ def test_scenario_1_full_release_flow_when_stock_sufficient(system):
     assert summary["total_stock"] == 70
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 2: 재고 부족 — 생산 후 출고 플로우
-# ---------------------------------------------------------------------------
 
 def test_scenario_2_production_then_release_when_stock_insufficient(system):
     sc = system["sample"]
@@ -133,9 +122,6 @@ def test_scenario_2_production_then_release_when_stock_insufficient(system):
     assert after_release_sample.stock == 2  # 12 - 10
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 3: 주문 거절 플로우
-# ---------------------------------------------------------------------------
 
 def test_scenario_3_reject_order_and_monitor_exclusion(system):
     sc = system["sample"]
@@ -172,9 +158,6 @@ def test_scenario_3_reject_order_and_monitor_exclusion(system):
     assert summary["order_count"] == 0
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 4: FIFO 생산 큐
-# ---------------------------------------------------------------------------
 
 def test_scenario_4_fifo_production_queue(system):
     sc = system["sample"]
@@ -218,9 +201,6 @@ def test_scenario_4_fifo_production_queue(system):
     assert pc.get_queue() == []
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 5: 재고 상태 전환
-# ---------------------------------------------------------------------------
 
 def test_scenario_5_stock_status_transitions(system):
     sc = system["sample"]
@@ -249,9 +229,6 @@ def test_scenario_5_stock_status_transitions(system):
     assert sc.get_stock_status("S005") == "고갈"
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 6: 미등록 시료 주문 시도
-# ---------------------------------------------------------------------------
 
 def test_scenario_6_reserve_with_unregistered_sample_id_raises_error(system):
     oc = system["order"]
@@ -265,9 +242,6 @@ def test_scenario_6_reserve_with_unregistered_sample_id_raises_error(system):
     assert order_repo.find_all() == []
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 7: 잘못된 상태 전이 차단
-# ---------------------------------------------------------------------------
 
 def test_scenario_7_invalid_state_transitions_are_blocked(system):
     sc = system["sample"]
@@ -295,9 +269,6 @@ def test_scenario_7_invalid_state_transitions_are_blocked(system):
         oc.reject(order.order_id)
 
 
-# ---------------------------------------------------------------------------
-# 시나리오 8: monitor 통계 정합성
-# ---------------------------------------------------------------------------
 
 def test_scenario_8_monitor_stats_consistency(system):
     sc = system["sample"]
