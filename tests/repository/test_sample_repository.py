@@ -214,3 +214,11 @@ class TestSampleRepositoryPersistence:
 
         repo2 = SampleRepository(filepath)
         assert repo2.find_by_id("S-001") is not None
+
+    def test_creates_empty_json_file_when_not_exists(self, tmp_path):
+        """파일이 없을 때 Repository 생성 시 빈 JSON 배열로 초기화해야 한다."""
+        filepath = tmp_path / "new_samples.json"
+        assert not filepath.exists()
+        SampleRepository(filepath)
+        assert filepath.exists()
+        assert json.loads(filepath.read_text(encoding="utf-8")) == []
