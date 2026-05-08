@@ -1,7 +1,7 @@
 from view.base_view import BaseView
 
-_COL = f"  {'순서':<5} {'주문번호':<22} {'시료 ID':<12} {'실 생산량':>10} {'부족분':>8}"
-_SEP = "  " + "-" * 60
+_COL = f"  {'순서':<5} {'주문번호':<22} {'시료명':<20} {'실 생산량':>10} {'부족분':>8}"
+_SEP = "  " + "-" * 68
 
 
 class ProductionView(BaseView):
@@ -16,7 +16,7 @@ class ProductionView(BaseView):
         print(f"  부족분       : {job.shortage}ea")
         print(f"  총 생산시간  : {job.total_time:.1f}분")
 
-    def show_queue(self, jobs: list):
+    def show_queue(self, jobs: list, sample_name_map: dict):
         print("\n--- 생산 대기 큐 ---")
         if not jobs:
             print("  대기 중인 작업이 없습니다.")
@@ -24,7 +24,8 @@ class ProductionView(BaseView):
         print(_COL)
         print(_SEP)
         for i, job in enumerate(jobs, 1):
-            print(f"  {i:<5} {job.order_id:<22} {job.sample_id:<12} {job.actual_production:>10} {job.shortage:>8}")
+            name = sample_name_map.get(job.sample_id, job.sample_id)
+            print(f"  {i:<5} {job.order_id:<22} {name:<20} {job.actual_production:>10} {job.shortage:>8}")
 
     def show_no_current(self):
         print("\n  현재 생산 중인 작업이 없습니다.")

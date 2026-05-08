@@ -96,7 +96,7 @@ class App:
 
     def _handle_approve_reject(self):
         reserved = self._order_ctrl.list_reserved()
-        self._order_view.show_reserved_list(reserved)
+        self._order_view.show_reserved_list(reserved, self._sample_name_map())
         if not reserved:
             return
 
@@ -152,7 +152,7 @@ class App:
             self._production_view.show_current_job(current, sample)
 
         queue = self._production_ctrl.get_queue()
-        self._production_view.show_queue(queue)
+        self._production_view.show_queue(queue, self._sample_name_map())
 
         if current is not None:
             ans = input("\n  현재 작업을 완료 처리하시겠습니까? (y/n): ").strip().lower()
@@ -165,7 +165,7 @@ class App:
 
     def _handle_release(self):
         confirmed = self._order_ctrl.list_confirmed()
-        self._order_view.show_confirmed_list(confirmed)
+        self._order_view.show_confirmed_list(confirmed, self._sample_name_map())
         if not confirmed:
             return
 
@@ -178,3 +178,6 @@ class App:
 
     def _get_summary(self) -> dict:
         return self._monitor_ctrl.get_summary()
+
+    def _sample_name_map(self) -> dict:
+        return {s.sample_id: s.name for s in self._sample_ctrl.find_all()}
