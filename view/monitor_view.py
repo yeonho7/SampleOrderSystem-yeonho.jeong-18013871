@@ -11,6 +11,11 @@ _SEP = "  " + "-" * 50
 
 
 class MonitorView(BaseView):
+    def get_sub_choice(self) -> str:
+        print("\n  1. 주문량 확인")
+        print("  2. 재고량 확인")
+        return input("  선택: ").strip()
+
     def show_order_stats(self, stats: dict):
         print("\n--- 주문량 현황 ---")
         for status, label in _LABELS.items():

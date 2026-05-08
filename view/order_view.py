@@ -7,6 +7,11 @@ _SEP = "  " + "-" * 76
 
 
 class OrderView(BaseView):
+    def get_approve_reject_choice(self) -> str:
+        print("  1. 승인")
+        print("  2. 거절")
+        return input("  선택: ").strip()
+
     def get_reserve_input(self) -> dict:
         print("\n--- 시료 주문 접수 ---")
         sample_id = input("시료 ID: ").strip()

@@ -29,3 +29,6 @@ class ProductionController:
 
     def get_queue_size(self) -> int:
         return self._job_repo.count()
+
+    def find_job(self, order_id: str):
+        return self._job_repo.find_by_id(order_id)

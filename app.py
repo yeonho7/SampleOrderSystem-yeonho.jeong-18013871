@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from model.order import OrderStatus
 from repository.sample_repository import SampleRepository
 from repository.order_repository import OrderRepository
 from repository.production_job_repository import ProductionJobRepository
@@ -41,7 +42,7 @@ class App:
             choice = self._main_view.get_choice()
 
             if choice == "0":
-                print("  시스템을 종료합니다.")
+                self._main_view.show_exit()
                 break
             elif choice == "1":
                 self._handle_sample()
@@ -56,13 +57,10 @@ class App:
             elif choice == "6":
                 self._handle_release()
             else:
-                print("  올바른 메뉴 번호를 입력하세요.")
+                self._main_view.show_invalid_choice()
 
     def _handle_sample(self):
-        print("\n  1. 시료 등록")
-        print("  2. 시료 목록 조회")
-        print("  3. 시료 검색")
-        sub = input("  선택: ").strip()
+        sub = self._sample_view.get_sub_choice()
 
         if sub == "1":
             try:
@@ -72,12 +70,10 @@ class App:
             except ValueError as e:
                 self._sample_view.show_message(f"오류: {e}")
         elif sub == "2":
-            samples = self._sample_ctrl.find_all()
-            self._sample_view.show_sample_list(samples)
+            self._sample_view.show_sample_list(self._sample_ctrl.find_all())
         elif sub == "3":
             keyword = self._sample_view.get_search_keyword()
-            results = self._sample_ctrl.search(keyword)
-            self._sample_view.show_search_result(results)
+            self._sample_view.show_search_result(self._sample_ctrl.search(keyword))
         else:
             self._sample_view.show_message("올바른 번호를 입력하세요.")
 
@@ -95,22 +91,13 @@ class App:
         if not reserved:
             return
 
-        print("  1. 승인")
-        print("  2. 거절")
-        sub = input("  선택: ").strip()
+        sub = self._order_view.get_approve_reject_choice()
 
         if sub == "1":
             order_id = self._order_view.get_order_id_input("  승인할 주문번호: ")
             try:
-                from model.order import OrderStatus
                 order = self._order_ctrl.approve(order_id)
-                job = None
-                if order.status == OrderStatus.PRODUCING:
-                    all_jobs = [self._production_ctrl.get_current()] + self._production_ctrl.get_queue()
-                    for j in all_jobs:
-                        if j is not None and j.order_id == order_id:
-                            job = j
-                            break
+                job = self._production_ctrl.find_job(order_id) if order.status == OrderStatus.PRODUCING else None
                 self._order_view.show_approve_result(order, job)
             except ValueError as e:
                 self._order_view.show_message(f"오류: {e}")
@@ -125,16 +112,12 @@ class App:
             self._order_view.show_message("올바른 번호를 입력하세요.")
 
     def _handle_monitor(self):
-        print("\n  1. 주문량 확인")
-        print("  2. 재고량 확인")
-        sub = input("  선택: ").strip()
+        sub = self._monitor_view.get_sub_choice()
 
         if sub == "1":
-            stats = self._monitor_ctrl.get_order_stats()
-            self._monitor_view.show_order_stats(stats)
+            self._monitor_view.show_order_stats(self._monitor_ctrl.get_order_stats())
         elif sub == "2":
-            stock_statuses = self._monitor_ctrl.get_stock_status_all()
-            self._monitor_view.show_stock_status_all(stock_statuses)
+            self._monitor_view.show_stock_status_all(self._monitor_ctrl.get_stock_status_all())
         else:
             self._monitor_view.show_message("올바른 번호를 입력하세요.")
 
@@ -146,8 +129,7 @@ class App:
             sample = self._sample_ctrl.find_by_id(current.sample_id)
             self._production_view.show_current_job(current, sample)
 
-        queue = self._production_ctrl.get_queue()
-        self._production_view.show_queue(queue, self._sample_name_map())
+        self._production_view.show_queue(self._production_ctrl.get_queue(), self._sample_name_map())
 
         if current is not None:
             ans = input("\n  현재 작업을 완료 처리하시겠습니까? (y/n): ").strip().lower()

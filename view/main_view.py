@@ -31,3 +31,9 @@ class MainView(BaseView):
 
     def get_choice(self) -> str:
         return input("메뉴 선택: ").strip()
+
+    def show_invalid_choice(self):
+        print("  올바른 메뉴 번호를 입력하세요.")
+
+    def show_exit(self):
+        print("  시스템을 종료합니다.")

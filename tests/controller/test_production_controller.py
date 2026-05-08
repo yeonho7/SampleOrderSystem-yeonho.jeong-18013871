@@ -187,3 +187,23 @@ def test_get_queue_size_returns_zero_when_no_jobs(controller):
     result = controller.get_queue_size()
 
     assert result == 0
+
+
+# ── find_job ──────────────────────────────────────────────────────────────────
+
+def test_find_job_returns_job_when_exists(controller, repos):
+    sample_repo, order_repo, job_repo = repos
+    _make_sample(sample_repo, stock=0)
+    _make_producing_order(order_repo, "ORD-20260508-0001")
+    _make_job(job_repo, "ORD-20260508-0001", actual_production=5)
+
+    result = controller.find_job("ORD-20260508-0001")
+
+    assert result is not None
+    assert result.order_id == "ORD-20260508-0001"
+
+
+def test_find_job_returns_none_when_not_exists(controller):
+    result = controller.find_job("ORD-99999999-0001")
+
+    assert result is None

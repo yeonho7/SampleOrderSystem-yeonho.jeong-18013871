@@ -5,6 +5,12 @@ _SEP = "  " + "-" * 60
 
 
 class SampleView(BaseView):
+    def get_sub_choice(self) -> str:
+        print("\n  1. 시료 등록")
+        print("  2. 시료 목록 조회")
+        print("  3. 시료 검색")
+        return input("  선택: ").strip()
+
     def get_register_input(self) -> dict:
         print("\n--- 시료 등록 ---")
         sample_id = input("시료 ID (예: S-001): ").strip()
