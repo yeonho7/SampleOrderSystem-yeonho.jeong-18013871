@@ -1,4 +1,10 @@
-class SampleView:
+from view.base_view import BaseView
+
+_COL = f"  {'ID':<10} {'시료명':<20} {'생산시간(min)':<14} {'수율':<8} {'재고(ea)'}"
+_SEP = "  " + "-" * 60
+
+
+class SampleView(BaseView):
     def get_register_input(self) -> dict:
         print("\n--- 시료 등록 ---")
         sample_id = input("시료 ID (예: S-001): ").strip()
@@ -15,27 +21,20 @@ class SampleView:
         }
 
     def show_sample_list(self, samples: list):
-        print("\n--- 시료 목록 ---")
-        if not samples:
-            print("  등록된 시료가 없습니다.")
-            return
-        print(f"  {'ID':<10} {'시료명':<20} {'생산시간(min)':<14} {'수율':<8} {'재고(ea)'}")
-        print("  " + "-" * 60)
-        for s in samples:
-            print(f"  {s.sample_id:<10} {s.name:<20} {s.avg_production_time:<14} {s.yield_rate:<8} {s.stock}")
+        self._show_sample_table("시료 목록", samples)
 
     def get_search_keyword(self) -> str:
         return input("검색어 입력: ").strip()
 
     def show_search_result(self, samples: list):
-        print("\n--- 검색 결과 ---")
+        self._show_sample_table("검색 결과", samples)
+
+    def _show_sample_table(self, title: str, samples: list):
+        print(f"\n--- {title} ---")
         if not samples:
-            print("  검색 결과가 없습니다.")
+            print("  해당 시료가 없습니다.")
             return
-        print(f"  {'ID':<10} {'시료명':<20} {'생산시간(min)':<14} {'수율':<8} {'재고(ea)'}")
-        print("  " + "-" * 60)
+        print(_COL)
+        print(_SEP)
         for s in samples:
             print(f"  {s.sample_id:<10} {s.name:<20} {s.avg_production_time:<14} {s.yield_rate:<8} {s.stock}")
-
-    def show_message(self, msg: str):
-        print(f"  {msg}")
