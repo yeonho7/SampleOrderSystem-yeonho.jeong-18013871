@@ -1,5 +1,4 @@
 from model.sample import Sample
-from model.order import OrderStatus
 from repository.sample_repository import SampleRepository
 from repository.order_repository import OrderRepository
 
@@ -35,11 +34,10 @@ class SampleController:
         sample = self._sample_repo.find_by_id(sample_id)
         if sample.stock == 0:
             return "고갈"
-        pending_statuses = (OrderStatus.RESERVED, OrderStatus.PRODUCING)
         pending_quantity = sum(
             o.quantity
             for o in self._order_repo.find_all()
-            if o.sample_id == sample_id and o.status in pending_statuses
+            if o.sample_id == sample_id and o.status.is_pending()
         )
         if sample.stock < pending_quantity:
             return "부족"

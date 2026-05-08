@@ -34,7 +34,7 @@ class OrderController:
 
     def approve(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
-        if order.status != OrderStatus.RESERVED:
+        if not order.is_reserved():
             raise ValueError("RESERVED 상태의 주문만 승인할 수 있습니다")
         sample = self._sample_repo.find_by_id(order.sample_id)
         if sample.stock >= order.quantity:
@@ -57,7 +57,7 @@ class OrderController:
 
     def reject(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
-        if order.status != OrderStatus.RESERVED:
+        if not order.is_reserved():
             raise ValueError("RESERVED 상태의 주문만 거절할 수 있습니다")
         order.status = OrderStatus.REJECTED
         self._order_repo.update(order)
@@ -65,7 +65,7 @@ class OrderController:
 
     def release(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
-        if order.status != OrderStatus.CONFIRMED:
+        if not order.is_confirmed():
             raise ValueError("CONFIRMED 상태의 주문만 출고할 수 있습니다")
         sample = self._sample_repo.find_by_id(order.sample_id)
         sample.stock -= order.quantity

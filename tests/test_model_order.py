@@ -214,3 +214,98 @@ class TestProductionJobFields:
         job = self._make_job(shortage=9, actual_production=10)
         assert job.shortage == 9
         assert job.actual_production == 10
+
+
+# ---------------------------------------------------------------------------
+# OrderStatus helper methods
+# ---------------------------------------------------------------------------
+
+class TestOrderStatusHelpers:
+    def test_is_pending_returns_true_for_reserved(self):
+        assert OrderStatus.RESERVED.is_pending() is True
+
+    def test_is_pending_returns_true_for_producing(self):
+        assert OrderStatus.PRODUCING.is_pending() is True
+
+    def test_is_pending_returns_false_for_confirmed(self):
+        assert OrderStatus.CONFIRMED.is_pending() is False
+
+    def test_is_pending_returns_false_for_rejected(self):
+        assert OrderStatus.REJECTED.is_pending() is False
+
+    def test_is_pending_returns_false_for_release(self):
+        assert OrderStatus.RELEASE.is_pending() is False
+
+    def test_is_rejected_returns_true_for_rejected(self):
+        assert OrderStatus.REJECTED.is_rejected() is True
+
+    def test_is_rejected_returns_false_for_reserved(self):
+        assert OrderStatus.RESERVED.is_rejected() is False
+
+    def test_is_rejected_returns_false_for_confirmed(self):
+        assert OrderStatus.CONFIRMED.is_rejected() is False
+
+
+# ---------------------------------------------------------------------------
+# Order helper methods
+# ---------------------------------------------------------------------------
+
+class TestOrderHelpers:
+    def _make_order(self, **overrides):
+        defaults = dict(
+            order_id="ORD-20260508-0001",
+            sample_id="S-001",
+            customer_name="테스트고객",
+            quantity=10,
+        )
+        defaults.update(overrides)
+        return Order(**defaults)
+
+    def test_is_reserved_returns_true_when_reserved(self):
+        order = self._make_order(status=OrderStatus.RESERVED)
+        assert order.is_reserved() is True
+
+    def test_is_reserved_returns_false_when_confirmed(self):
+        order = self._make_order(status=OrderStatus.CONFIRMED)
+        assert order.is_reserved() is False
+
+    def test_is_confirmed_returns_true_when_confirmed(self):
+        order = self._make_order(status=OrderStatus.CONFIRMED)
+        assert order.is_confirmed() is True
+
+    def test_is_confirmed_returns_false_when_reserved(self):
+        order = self._make_order(status=OrderStatus.RESERVED)
+        assert order.is_confirmed() is False
+
+
+# ---------------------------------------------------------------------------
+# __repr__
+# ---------------------------------------------------------------------------
+
+class TestModelRepr:
+    def test_sample_repr_contains_sample_id(self):
+        s = Sample(sample_id="S-001", name="실리콘 웨이퍼", avg_production_time=2.5, yield_rate=0.92, stock=100)
+        assert "S-001" in repr(s)
+
+    def test_sample_repr_contains_stock(self):
+        s = Sample(sample_id="S-001", name="실리콘 웨이퍼", avg_production_time=2.5, yield_rate=0.92, stock=42)
+        assert "42" in repr(s)
+
+    def test_order_repr_contains_order_id(self):
+        o = Order(order_id="ORD-20260508-0001", sample_id="S-001", customer_name="홍길동", quantity=10)
+        assert "ORD-20260508-0001" in repr(o)
+
+    def test_order_repr_contains_status(self):
+        o = Order(order_id="ORD-20260508-0001", sample_id="S-001", customer_name="홍길동", quantity=10,
+                  status=OrderStatus.CONFIRMED)
+        assert "CONFIRMED" in repr(o)
+
+    def test_production_job_repr_contains_order_id(self):
+        job = ProductionJob(order_id="ORD-20260508-0001", sample_id="S-001",
+                            shortage=5, actual_production=7, total_time=14.0)
+        assert "ORD-20260508-0001" in repr(job)
+
+    def test_production_job_repr_contains_shortage(self):
+        job = ProductionJob(order_id="ORD-20260508-0001", sample_id="S-001",
+                            shortage=5, actual_production=7, total_time=14.0)
+        assert "5" in repr(job)

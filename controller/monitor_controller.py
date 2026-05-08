@@ -20,7 +20,6 @@ class MonitorController:
         return result
 
     def get_stock_status_all(self) -> list:
-        pending_statuses = (OrderStatus.RESERVED, OrderStatus.PRODUCING)
         orders = self._order_repo.find_all()
         result = []
         for sample in self._sample_repo.find_all():
@@ -30,7 +29,7 @@ class MonitorController:
                 pending = sum(
                     o.quantity
                     for o in orders
-                    if o.sample_id == sample.sample_id and o.status in pending_statuses
+                    if o.sample_id == sample.sample_id and o.status.is_pending()
                 )
                 status = "부족" if sample.stock < pending else "여유"
             result.append({"sample": sample, "status": status})
@@ -39,7 +38,7 @@ class MonitorController:
     def get_summary(self) -> dict:
         samples = self._sample_repo.find_all()
         orders = self._order_repo.find_all()
-        non_rejected = [o for o in orders if o.status != OrderStatus.REJECTED]
+        non_rejected = [o for o in orders if not o.status.is_rejected()]
         producing_count = sum(1 for o in orders if o.status == OrderStatus.PRODUCING)
         return {
             "sample_count": len(samples),
