@@ -39,10 +39,17 @@ class OrderController:
         if not order.is_reserved():
             raise ValueError("RESERVED 상태의 주문만 승인할 수 있습니다")
         sample = self._sample_repo.find_by_id(order.sample_id)
-        if sample.stock >= order.quantity:
+        # 이미 CONFIRMED된 주문이 선점한 재고를 제외한 가용 재고로 판단
+        committed = sum(
+            o.quantity
+            for o in self._order_repo.find_by_status(OrderStatus.CONFIRMED)
+            if o.sample_id == order.sample_id
+        )
+        available = sample.stock - committed
+        if available >= order.quantity:
             order.status = OrderStatus.CONFIRMED
         else:
-            shortage = order.quantity - sample.stock
+            shortage = order.quantity - max(available, 0)
             actual_production = ceil(shortage / (sample.yield_rate * 0.9))
             total_time = sample.avg_production_time * actual_production
             job = ProductionJob(
@@ -74,6 +81,8 @@ class OrderController:
         if not order.is_confirmed():
             raise ValueError("CONFIRMED 상태의 주문만 출고할 수 있습니다")
         sample = self._sample_repo.find_by_id(order.sample_id)
+        if sample.stock < order.quantity:
+            raise ValueError("재고가 부족합니다")
         sample.stock -= order.quantity
         self._sample_repo.update(sample)
         order.status = OrderStatus.RELEASE

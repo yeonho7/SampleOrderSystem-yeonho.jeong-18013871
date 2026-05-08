@@ -177,6 +177,35 @@ class TestOrderControllerApprove:
         with pytest.raises(ValueError):
             ctrl.approve(order.order_id)
 
+    def test_approve_second_order_producing_when_committed_stock_insufficient(self, repos):
+        # stock=10, 주문A qty=8 → CONFIRMED (가용 재고 10-8=2 남음)
+        # 주문B qty=5 → 가용 재고 2 < 5이므로 PRODUCING이어야 함 (버그 시 CONFIRMED)
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        order_a = ctrl.reserve("S-001", "고객A", 8)
+        order_b = ctrl.reserve("S-001", "고객B", 5)
+
+        ctrl.approve(order_a.order_id)
+        result_b = ctrl.approve(order_b.order_id)
+
+        assert result_b.status == OrderStatus.PRODUCING
+
+    def test_approve_shortage_accounts_for_committed_stock(self, repos):
+        # stock=10, 주문A qty=8 CONFIRMED → 가용 재고 2
+        # 주문B qty=5 → shortage = 5 - 2 = 3 (물리 재고 기준이 아닌 가용 재고 기준)
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        order_a = ctrl.reserve("S-001", "고객A", 8)
+        order_b = ctrl.reserve("S-001", "고객B", 5)
+
+        ctrl.approve(order_a.order_id)
+        ctrl.approve(order_b.order_id)
+
+        job = job_repo.find_by_id(order_b.order_id)
+        assert job.shortage == 3  # 5 - 2(가용)
+
 
 class TestOrderControllerReject:
 
@@ -262,6 +291,20 @@ class TestOrderControllerRelease:
         make_sample(sample_repo, stock=0)
         order = ctrl.reserve("S-001", "고객A", 5)
         ctrl.approve(order.order_id)  # PRODUCING 상태
+
+        with pytest.raises(ValueError):
+            ctrl.release(order.order_id)
+
+    def test_release_raises_when_stock_is_insufficient(self, repos):
+        # 승인 후 재고가 외부 요인으로 감소한 경우 release가 거부되어야 함
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        order = ctrl.reserve("S-001", "고객A", 8)
+        ctrl.approve(order.order_id)  # CONFIRMED
+        sample = sample_repo.find_by_id("S-001")
+        sample.stock = 3  # 재고 강제 감소
+        sample_repo.update(sample)
 
         with pytest.raises(ValueError):
             ctrl.release(order.order_id)
