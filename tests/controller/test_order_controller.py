@@ -199,6 +199,20 @@ class TestOrderControllerApprove:
 
         assert result_b.status == OrderStatus.PRODUCING
 
+    def test_approve_refreshes_updated_at(self, repos):
+        from datetime import datetime
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        order = ctrl.reserve("S-001", "고객A", 5)
+        order.updated_at = datetime(2000, 1, 1)
+        order_repo.update(order)
+
+        ctrl.approve(order.order_id)
+
+        saved = order_repo.find_by_id(order.order_id)
+        assert saved.updated_at > datetime(2000, 1, 1)
+
     def test_approve_shortage_accounts_for_committed_stock(self, repos):
         # stock=10, 주문A qty=8 CONFIRMED → 가용 재고 2
         # 주문B qty=5 → shortage = 5 - 2 = 3 (물리 재고 기준이 아닌 가용 재고 기준)
@@ -236,6 +250,20 @@ class TestOrderControllerReject:
 
         with pytest.raises(ValueError):
             ctrl.reject(order.order_id)
+
+    def test_reject_refreshes_updated_at(self, repos):
+        from datetime import datetime
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        order = ctrl.reserve("S-001", "고객A", 5)
+        order.updated_at = datetime(2000, 1, 1)
+        order_repo.update(order)
+
+        ctrl.reject(order.order_id)
+
+        saved = order_repo.find_by_id(order.order_id)
+        assert saved.updated_at > datetime(2000, 1, 1)
 
     def test_reject_raises_when_order_already_rejected(self, repos):
         sample_repo, order_repo, job_repo = repos
@@ -302,6 +330,22 @@ class TestOrderControllerRelease:
 
         with pytest.raises(ValueError):
             ctrl.release(order.order_id)
+
+    def test_release_refreshes_updated_at(self, repos):
+        from datetime import datetime
+        sample_repo, order_repo, job_repo = repos
+        ctrl = OrderController(sample_repo, order_repo, job_repo)
+        make_sample(sample_repo, stock=10)
+        order = ctrl.reserve("S-001", "고객A", 5)
+        ctrl.approve(order.order_id)
+        approved = order_repo.find_by_id(order.order_id)
+        approved.updated_at = datetime(2000, 1, 1)
+        order_repo.update(approved)
+
+        ctrl.release(order.order_id)
+
+        saved = order_repo.find_by_id(order.order_id)
+        assert saved.updated_at > datetime(2000, 1, 1)
 
     def test_release_raises_when_stock_is_insufficient(self, repos):
         # 승인 후 재고가 외부 요인으로 감소한 경우 release가 거부되어야 함

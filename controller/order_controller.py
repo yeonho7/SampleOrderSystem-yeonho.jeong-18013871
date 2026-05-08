@@ -1,5 +1,5 @@
 from math import ceil
-from datetime import date
+from datetime import date, datetime
 from model.order import Order, OrderStatus
 from model.production_job import ProductionJob
 
@@ -63,6 +63,7 @@ class OrderController:
             )
             self._job_repo.create(job)
             order.status = OrderStatus.PRODUCING
+        order.updated_at = datetime.now()
         self._order_repo.update(order)
         return order
 
@@ -73,6 +74,7 @@ class OrderController:
         if not order.is_reserved():
             raise ValueError("RESERVED 상태의 주문만 거절할 수 있습니다")
         order.status = OrderStatus.REJECTED
+        order.updated_at = datetime.now()
         self._order_repo.update(order)
         return order
 
@@ -88,6 +90,7 @@ class OrderController:
         sample.stock -= order.quantity
         self._sample_repo.update(sample)
         order.status = OrderStatus.RELEASE
+        order.updated_at = datetime.now()
         self._order_repo.update(order)
         return order
 

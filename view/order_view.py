@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from view.base_view import BaseView
 
 _COL = f"  {'번호':<5} {'주문번호':<22} {'고객명':<15} {'시료명':<20} {'수량':>6} {'상태'}"
@@ -56,7 +54,7 @@ class OrderView(BaseView):
         print(f"\n  출고 처리 완료")
         print(f"  주문번호   : {order.order_id}")
         print(f"  출고 수량  : {order.quantity}ea")
-        print(f"  처리 일시  : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"  처리 일시  : {order.updated_at.strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"  상태       : {order.status.value}")
 
     def _show_order_table(self, title: str, orders: list, sample_name_map: dict):

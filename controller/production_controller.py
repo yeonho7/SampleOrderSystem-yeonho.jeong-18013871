@@ -1,3 +1,4 @@
+from datetime import datetime
 from model.order import OrderStatus
 
 
@@ -16,6 +17,7 @@ class ProductionController:
         sample.stock += job.actual_production
         self._sample_repo.update(sample)
         order.status = OrderStatus.CONFIRMED
+        order.updated_at = datetime.now()
         self._order_repo.update(order)
         self._job_repo.delete(job.order_id)
         return order
