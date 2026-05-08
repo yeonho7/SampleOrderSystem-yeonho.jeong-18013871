@@ -9,6 +9,8 @@ class BaseRepository(ABC):
 
     def __init__(self, filepath: Path):
         self._filepath = filepath
+        if not filepath.exists():
+            self._write([])
 
     def _read(self) -> list[dict]:
         return json.loads(self._filepath.read_text(encoding="utf-8"))

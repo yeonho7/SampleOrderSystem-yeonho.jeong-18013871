@@ -19,11 +19,6 @@ class App:
 
     def __init__(self):
         self.DATA_DIR.mkdir(exist_ok=True)
-        for filename in ("samples.json", "orders.json", "production_jobs.json"):
-            path = self.DATA_DIR / filename
-            if not path.exists():
-                path.write_text("[]", encoding="utf-8")
-
         sample_repo = SampleRepository(self.DATA_DIR / "samples.json")
         order_repo = OrderRepository(self.DATA_DIR / "orders.json")
         job_repo = ProductionJobRepository(self.DATA_DIR / "production_jobs.json")
